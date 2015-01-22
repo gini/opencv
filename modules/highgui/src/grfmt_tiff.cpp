@@ -190,8 +190,8 @@ bool  TiffDecoder::readData( Mat& img )
         int is_tiled = TIFFIsTiled(tif);
         uint16 photometric;
         TIFFGetField( tif, TIFFTAG_PHOTOMETRIC, &photometric );
-        uint16 bpp = 8, ncn = photometric > 1 ? 3 : 1;
-        TIFFGetField( tif, TIFFTAG_BITSPERSAMPLE, &bpp );
+        uint16 bits_per_sample = 8, ncn = photometric > 1 ? 3 : 1;
+        TIFFGetField( tif, TIFFTAG_BITSPERSAMPLE, &bits_per_sample );
         TIFFGetField( tif, TIFFTAG_SAMPLESPERPIXEL, &ncn );
         const int bitsPerByte = 8;
         int dst_bpp = (int)(img.elemSize1() * bitsPerByte);
@@ -221,7 +221,13 @@ bool  TiffDecoder::readData( Mat& img )
                 (!is_tiled && tile_height0 == std::numeric_limits<uint32>::max()) )
                 tile_height0 = m_height;
 
-            const size_t buffer_size = bpp * ncn * tile_height0 * tile_width0;
+            const size_t required_bytes_per_pixel =
+                dst_bpp == 8
+                // If dst_bpp == 8, libtiff's RGBA functions will be used, hence we always need
+                // 4 * 8 == 32 bits per pixel (i.e. 4 bytes) in our buffer
+                ? 4
+                : (bits_per_sample * ncn) / bitsPerByte;
+            const size_t buffer_size = required_bytes_per_pixel * tile_height0 * tile_width0;
             AutoBuffer<uchar> _buffer( buffer_size );
             uchar* buffer = _buffer;
             ushort* buffer16 = (ushort*)buffer;
