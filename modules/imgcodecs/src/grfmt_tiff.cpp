@@ -159,6 +159,9 @@ bool TiffDecoder::readHeader()
             int wanted_channels = normalizeChannelsNumber(ncn);
             switch(bpp)
             {
+		case 1:
+		    m_type = CV_MAKETYPE(CV_8U, photometric > 1 ? wanted_channels : 1);
+		    break;
                 case 8:
                     m_type = CV_MAKETYPE(CV_8U, photometric > 1 ? wanted_channels : 1);
                     break;
@@ -247,7 +250,13 @@ bool  TiffDecoder::readData( Mat& img )
                (!is_tiled && tile_height0 == std::numeric_limits<uint32>::max()) )
                 tile_height0 = m_height;
 
-            const size_t buffer_size = bpp * ncn * tile_height0 * tile_width0;
+            const size_t required_bytes_per_pixel =
+                dst_bpp == 8
+                // If dst_bpp == 8, libtiff's RGBA functions will be used, hence we always need
+                // 4 * 8 == 32 bits per pixel (i.e. 4 bytes) in our buffer
+                ? 4
+                : bpp * ncn;
+            const size_t buffer_size = required_bytes_per_pixel * tile_height0 * tile_width0;
             AutoBuffer<uchar> _buffer( buffer_size );
             uchar* buffer = _buffer;
             ushort* buffer16 = (ushort*)buffer;
