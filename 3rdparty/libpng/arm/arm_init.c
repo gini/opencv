@@ -16,6 +16,9 @@
 
 #include "../pngpriv.h"
 
+// Force disable NEON, brute force solution for using this libpng in OpenCV 3.1.0 with iOS 
+#define PNG_ARM_NEON_OPT 0 
+
 #ifdef PNG_READ_SUPPORTED
 
 #if PNG_ARM_NEON_OPT > 0
