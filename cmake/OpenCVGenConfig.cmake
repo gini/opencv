@@ -91,6 +91,8 @@ function(ocv_gen_config TMP_DIR NESTED_PATH ROOT_NAME)
   install(FILES
       "${TMP_DIR}/OpenCVConfig-version.cmake"
       "${__tmp_nested}/OpenCVConfig.cmake"
+      "${OpenCV_SOURCE_DIR}/cmake/OpenCVFindWebP.cmake"
+      "${OpenCV_SOURCE_DIR}/cmake/OpenCVFindOpenEXR.cmake"
       DESTINATION "${__install_nested}" COMPONENT dev)
 
   if(ROOT_NAME)

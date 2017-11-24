@@ -22,6 +22,7 @@
 #
 #    This file will define the following variables:
 #      - OpenCV_LIBS                     : The list of all imported targets for OpenCV modules.
+#      - OpenCV_DEPENDENCY_LIBS          : The list of all dependency libraries for OpenCV modules.
 #      - OpenCV_INCLUDE_DIRS             : The OpenCV include directories.
 #      - OpenCV_COMPUTE_CAPABILITIES     : The version of compute capability.
 #      - OpenCV_ANDROID_NATIVE_API_LEVEL : Minimum required level of Android API.
@@ -268,3 +269,64 @@ endmacro()
 # installation directory for the status.
 find_package_handle_standard_args(OpenCV REQUIRED_VARS OpenCV_INSTALL_PATH
                                   VERSION_VAR OpenCV_VERSION ${_OpenCV_FPHSA_ARGS})
+
+# ----------------------------------------------------------------------------
+#  Check for 3rd-party image IO libraries
+# ----------------------------------------------------------------------------
+include(CMakeFindDependencyMacro)
+set(OpenCV_DEPENDENCY_LIBS "")
+# --- zlib (required) ---
+if(NOT @BUILD_ZLIB@)
+  find_dependency(ZLIB)
+  set(OpenCV_DEPENDENCY_LIBS "${OpenCV_DEPENDENCY_LIBS};${ZLIB_LIBRARY}")
+endif()
+
+# --- libtiff (optional, should be searched after zlib) ---
+if(@WITH_TIFF@ AND NOT "" STREQUAL "@TIFF_FOUND@")
+  find_dependency(TIFF)
+  set(OpenCV_DEPENDENCY_LIBS "${OpenCV_DEPENDENCY_LIBS};${TIFF_LIBRARIES}")
+endif()
+
+# --- libjpeg (optional) ---
+if(@WITH_JPEG@ AND NOT "" STREQUAL "@JPEG_FOUND@")
+  find_dependency(JPEG)
+  set(OpenCV_DEPENDENCY_LIBS "${OpenCV_DEPENDENCY_LIBS};${JPEG_LIBRARIES}")
+endif()
+
+# --- libwebp (optional) ---
+if(@WITH_WEBP@ AND NOT "" STREQUAL "@WEBP_FOUND@")
+  find_dependency(WEBP)
+  set(OpenCV_DEPENDENCY_LIBS "${OpenCV_DEPENDENCY_LIBS};${WEBP_LIBRARIES}")
+endif()
+
+# --- libjasper (optional, should be searched after libjpeg) ---
+if(@WITH_JASPER@ AND NOT "" STREQUAL "@JASPER_FOUND@")
+  find_dependency(Jasper)
+  set(OpenCV_DEPENDENCY_LIBS "${OpenCV_DEPENDENCY_LIBS};${JASPER_LIBRARIES}")
+endif()
+
+# --- libpng (optional, should be searched after zlib) ---
+if(@WITH_PNG@ AND NOT "" STREQUAL "@PNG_FOUND@")
+  find_dependency(PNG)
+  set(OpenCV_DEPENDENCY_LIBS "${OpenCV_DEPENDENCY_LIBS};${PNG_LIBRARIES}")
+endif()
+
+# --- OpenEXR (optional) ---
+if(@WITH_OPENEXR@ AND NOT "" STREQUAL "@OPENEXR_FOUND@")
+  find_dependency(OpenEXR)
+  set(OpenCV_DEPENDENCY_LIBS "${OpenCV_DEPENDENCY_LIBS};${OPENEXR_LIBRARIES}")
+endif()
+
+# --- GDAL (optional) ---
+if(@WITH_GDAL@ AND "YES" STREQUAL "@HAVE_GDCM@")
+  find_dependency(GDAL)
+  set(OpenCV_DEPENDENCY_LIBS "${OpenCV_DEPENDENCY_LIBS};${GDAL_LIBRARIES}")
+endif()
+
+if(@WITH_GDCM@ AND "YES" STREQUAL "@HAVE_GDCM@")
+  find_dependency(GDCM)
+  set(OpenCV_DEPENDENCY_LIBS "${OpenCV_DEPENDENCY_LIBS};${GDCM_LIBRARIES}")
+endif()
+
+string(STRIP "${OpenCV_DEPENDENCY_LIBS}" OpenCV_DEPENDENCY_LIBS)
+
