@@ -301,7 +301,7 @@ endif()
 
 # --- libjasper (optional, should be searched after libjpeg) ---
 if(@WITH_JASPER@ AND NOT "" STREQUAL "@JASPER_FOUND@")
-  find_dependency(Jasper)
+  find_package(Jasper @JASPER_VERSION_STRING@ EXACT)
   set(OpenCV_DEPENDENCY_LIBS "${OpenCV_DEPENDENCY_LIBS};${JASPER_LIBRARIES}")
 endif()
 
